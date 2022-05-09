@@ -1,16 +1,12 @@
 package com.example.monitor
 
-import android.app.Activity
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
-import org.json.JSONException
-import org.json.JSONObject
 
 class MqttClient {
     private val tag = "PahoMqttClient"
@@ -68,22 +64,27 @@ class MqttClient {
             }
         }
     }
+
+    @Throws(MqttException::class)
+    fun publish(client: MqttAndroidClient, topic: String, payload: ByteArray) {
+        val token = client.publish(topic, payload, 2, false)
+    }
 }
 
-class MqttMessageService : Service() {
+class MqttMessageService(val context: Context, val messageManager: MessageManager) : Service() {
 
     private var mqttBrokerUrl = "tcp://10.0.2.2:1883"
-    var mMqttClient: MqttClient? = null
-    var mqttClient: MqttAndroidClient? = null
+    var mqttClient: MqttClient? = null
+    var mqttAndroidClient: MqttAndroidClient? = null
 
     private val tag = "MqttMessageService"
 
-    fun connect(context: Context, messageManager: MessageManager) {
-        mMqttClient = MqttClient()
+    fun connect() {
+        mqttClient = MqttClient()
         //val mDeviceID = Settings.System.getString(contentResolver, Settings.System.ANDROID_ID)
-        mqttClient = mMqttClient!!.getMqttClient(context, mqttBrokerUrl, "client1")
+        mqttAndroidClient = mqttClient!!.getMqttClient(context, mqttBrokerUrl, "client1")
 
-        mqttClient!!.setCallback(object : MqttCallbackExtended {
+        mqttAndroidClient!!.setCallback(object : MqttCallbackExtended {
             override fun connectionLost(cause: Throwable?) {
                 Log.d(tag, "connectionLost")
             }
@@ -91,7 +92,7 @@ class MqttMessageService : Service() {
             override fun messageArrived(topic: String, message: MqttMessage) {
                 Log.d(tag, "messageArrived")
                 Log.d(tag, "Topic : $topic, Content : $message")
-                messageManager.add(String(message.payload))
+                messageManager.add(topic, String(message.payload))
                 //send notification
             }
 
@@ -102,7 +103,8 @@ class MqttMessageService : Service() {
             override fun connectComplete(reconnect: Boolean, serverURI: String) {
                 Log.d(tag, "connectComplete $serverURI")
                 try {
-                    mMqttClient!!.subscribe(mqttClient!!, "MQTT_Test", 2)
+                    mqttClient!!.subscribe(mqttAndroidClient!!, "monitor/door/state_change", 2)
+                    mqttClient!!.subscribe(mqttAndroidClient!!, "monitor/door/log", 2)
                 } catch (e: MqttException) {
                     e.printStackTrace()
                 }

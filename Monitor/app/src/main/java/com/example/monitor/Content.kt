@@ -1,27 +1,15 @@
 package com.example.monitor
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Service
-import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.os.IBinder
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.*
-import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
 class Content : AppCompatActivity() {
@@ -40,11 +28,14 @@ class Content : AppCompatActivity() {
             run {
                 messageManager = MessageManager(applicationContext, this, notificationHandler)
                 recyclerView.adapter = messageManager!!.mAdapter
-
-                val mqttService = MqttMessageService()
-                mqttService.connect(applicationContext, messageManager!!)
             }
         }.start()
+    }
+
+    fun confirm(view: View) {
+        val buttonConfirm: TextView = view.findViewById(R.id.buttonConfirm)
+        messageManager!!.verify()
+        buttonConfirm.visibility = View.GONE
     }
 
     fun clear(view: View) {
@@ -64,8 +55,8 @@ class Content : AppCompatActivity() {
 class MyAdapter(private val dataList: List<DeviceState>) : RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
     class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val stateText: TextView = view.findViewById(R.id.state)
-        val dateText: TextView = view.findViewById(R.id.date)
         val timeText: TextView = view.findViewById(R.id.time)
+        val identityText: TextView = view.findViewById(R.id.identity)
     }
 
     override fun getItemCount() = dataList.size
@@ -78,8 +69,8 @@ class MyAdapter(private val dataList: List<DeviceState>) : RecyclerView.Adapter<
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.stateText.text = dataList[position].state
-        holder.dateText.text = dataList[position].date
         holder.timeText.text = dataList[position].time
+        holder.identityText.text = dataList[position].identity
     }
 }
 

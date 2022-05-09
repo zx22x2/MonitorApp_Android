@@ -14,8 +14,7 @@
         android:layout_margin="10dp"
         android:background="#fcfcfc"
         android:gravity="center"
-        android:padding="20dp"
-        android:visibility="gone">
+        android:padding="20dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -26,6 +25,15 @@
             android:id="@+id/device_state"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/buttonConfirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:onClick="confirm"
+            android:text="認領"
+            android:visibility="gone" />
 
     </LinearLayout>
 

@@ -20,7 +20,7 @@ class NotificationHandler(context: Context) {
     init {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            channel = NotificationChannel(channelID, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+            channel = NotificationChannel(channelID, channelName, NotificationManager.IMPORTANCE_HIGH)
             manager!!.createNotificationChannel(channel!!)
         }
     }

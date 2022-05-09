@@ -20,10 +20,10 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="日期 : "/>
+        android:text="時間 : "/>
 
     <TextView
-        android:id="@+id/date"
+        android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="10dp"/>
@@ -31,10 +31,10 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="時間 : "/>
+        android:text="認領 : "/>
 
     <TextView
-        android:id="@+id/time"
+        android:id="@+id/identity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 

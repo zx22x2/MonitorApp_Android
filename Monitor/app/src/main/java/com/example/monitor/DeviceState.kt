@@ -6,8 +6,8 @@ import androidx.room.*
 data class DeviceState(
     @PrimaryKey(true) val id: Int,
     val state: String,
-    val date: String,
-    val time: String
+    val time: String,
+    val identity: String
 )
 
 @Dao
