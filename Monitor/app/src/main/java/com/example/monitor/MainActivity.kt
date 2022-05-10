@@ -35,8 +35,8 @@ class MainActivity : AppCompatActivity() {
         val passwordEditText: EditText = findViewById(R.id.password)
         val info: TextView = findViewById(R.id.login_info)
 
-        val username = usernameEditText.text.trim()
-        val password = passwordEditText.text.trim()
+        val username = usernameEditText.text.trim().toString()
+        val password = passwordEditText.text.trim().toString()
 
         val queue = Volley.newRequestQueue(this)
         val url = "http://hi87.atwebpages.com/login.php"
@@ -48,6 +48,7 @@ class MainActivity : AppCompatActivity() {
             val loginRequest = object : StringRequest(Request.Method.POST, url,
                 Response.Listener { response ->
                     if(response == "登入成功!") {
+                        editor.putString("username", username).commit()
                         editor.putBoolean("isLogin", true).commit()
                         toContent()
                     }
@@ -62,8 +63,8 @@ class MainActivity : AppCompatActivity() {
 
                 override fun getParams(): Map<String, String> {
                     val params = HashMap<String, String>()
-                    params.put("username", username.toString())
-                    params.put("password", password.toString())
+                    params.put("username", username)
+                    params.put("password", password)
 
                     return params
                 }

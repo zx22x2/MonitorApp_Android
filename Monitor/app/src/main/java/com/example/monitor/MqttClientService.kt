@@ -8,7 +8,7 @@ import android.util.Log
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
-class MqttClient {
+class MqttClientService {
     private val tag = "PahoMqttClient"
 
     private fun getMqttConnectionOptions(): MqttConnectOptions {
@@ -73,16 +73,16 @@ class MqttClient {
 
 class MqttMessageService(val context: Context, val messageManager: MessageManager) : Service() {
 
-    private var mqttBrokerUrl = "tcp://10.0.2.2:1883"
-    var mqttClient: MqttClient? = null
+    private var mqttBrokerUrl = "tcp://broker.hivemq.com:1883"
+    var mqttClientService: MqttClientService? = null
     var mqttAndroidClient: MqttAndroidClient? = null
 
     private val tag = "MqttMessageService"
 
     fun connect() {
-        mqttClient = MqttClient()
-        //val mDeviceID = Settings.System.getString(contentResolver, Settings.System.ANDROID_ID)
-        mqttAndroidClient = mqttClient!!.getMqttClient(context, mqttBrokerUrl, "client1")
+        mqttClientService = MqttClientService()
+        val clientId = MqttClient.generateClientId()
+        mqttAndroidClient = mqttClientService!!.getMqttClient(context, mqttBrokerUrl, clientId)
 
         mqttAndroidClient!!.setCallback(object : MqttCallbackExtended {
             override fun connectionLost(cause: Throwable?) {
@@ -103,8 +103,8 @@ class MqttMessageService(val context: Context, val messageManager: MessageManage
             override fun connectComplete(reconnect: Boolean, serverURI: String) {
                 Log.d(tag, "connectComplete $serverURI")
                 try {
-                    mqttClient!!.subscribe(mqttAndroidClient!!, "monitor/door/state_change", 2)
-                    mqttClient!!.subscribe(mqttAndroidClient!!, "monitor/door/log", 2)
+                    mqttClientService!!.subscribe(mqttAndroidClient!!, "monitor/door/state_change", 2)
+                    mqttClientService!!.subscribe(mqttAndroidClient!!, "monitor/door/log", 2)
                 } catch (e: MqttException) {
                     e.printStackTrace()
                 }

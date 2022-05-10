@@ -9,8 +9,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.*
-import org.eclipse.paho.client.mqttv3.*
 
 class Content : AppCompatActivity() {
     private var messageManager: MessageManager? = null
@@ -20,13 +18,16 @@ class Content : AppCompatActivity() {
         setContentView(R.layout.content)
 
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        recyclerView.layoutManager = LinearLayoutManagerWrapper(this, LinearLayoutManager.VERTICAL, false)
 
         val notificationHandler = NotificationHandler(this)
 
+        val pref = getSharedPreferences("userdata", MODE_PRIVATE)
+        val username = pref.getString("username", null)
+
         Thread {
             run {
-                messageManager = MessageManager(applicationContext, this, notificationHandler)
+                messageManager = MessageManager(applicationContext, this, notificationHandler, username!!)
                 recyclerView.adapter = messageManager!!.mAdapter
             }
         }.start()
@@ -45,7 +46,7 @@ class Content : AppCompatActivity() {
     fun logout(view: android.view.View) {
         val pref = getSharedPreferences("userdata", MODE_PRIVATE)
         val editor = pref.edit()
-        editor.putBoolean("isLogin", false).commit()
+        editor.clear()
 
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
