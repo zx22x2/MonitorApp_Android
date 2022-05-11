@@ -112,6 +112,10 @@ class MqttMessageService(val context: Context, val messageManager: MessageManage
         })
     }
 
+    fun disconnect() {
+        mqttAndroidClient?.disconnect()
+    }
+
     override fun onBind(p0: Intent?): IBinder? {
         TODO("Not yet implemented")
     }

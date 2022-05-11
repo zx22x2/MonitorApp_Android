@@ -2,6 +2,7 @@ package com.example.monitor
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,28 +10,61 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
 
 class Content : AppCompatActivity() {
+    private val tag = "Activity/Content"
+
+    var db: AppDatabase? = null
+    var dao: DeviceStateDao? = null
+    private var dataList = mutableListOf<DeviceState>()
+
     private var messageManager: MessageManager? = null
+
+    var mAdapter: MyAdapter? = null
+    var recyclerView: RecyclerView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.content)
+        Log.d(tag, "onCreate()")
 
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManagerWrapper(this, LinearLayoutManager.VERTICAL, false)
+        Thread {
+            run {
+                db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "smart_home").build()
+                dao = db!!.getDao()
+                dataList.addAll(dao!!.getAll())
+            }
+        }.start()
 
         val notificationHandler = NotificationHandler(this)
 
         val pref = getSharedPreferences("userdata", MODE_PRIVATE)
         val username = pref.getString("username", null)
 
+        mAdapter = MyAdapter(dataList!!)
+        recyclerView = findViewById(R.id.recyclerView)
+        recyclerView!!.layoutManager = LinearLayoutManagerWrapper(this, LinearLayoutManager.VERTICAL, false)
+        recyclerView!!.adapter = mAdapter
+
         Thread {
             run {
-                messageManager = MessageManager(applicationContext, this, notificationHandler, username!!)
-                recyclerView.adapter = messageManager!!.mAdapter
+                messageManager = MessageManager(applicationContext, this, notificationHandler, username!!
+                )
             }
         }.start()
+    }
+
+    fun record(data: DeviceState) {
+        Log.d(tag, "record()")
+        Thread {
+            run {
+                dao?.insert(data)
+            }
+        }.start()
+        dataList!!.add(data)
+        Log.d(tag, "$dataList")
+        mAdapter!!.notifyItemInserted(dataList!!.size-1)
     }
 
     fun confirm(view: View) {
@@ -40,16 +74,28 @@ class Content : AppCompatActivity() {
     }
 
     fun clear(view: View) {
-        messageManager!!.clear()
+        Thread {
+            run {
+                dao?.clear()
+            }
+        }.start()
+        dataList!!.clear()
+        mAdapter!!.notifyDataSetChanged()
     }
 
     fun logout(view: android.view.View) {
         val pref = getSharedPreferences("userdata", MODE_PRIVATE)
         val editor = pref.edit()
-        editor.clear()
+        editor.clear().commit()
 
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, Login::class.java)
         startActivity(intent)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        messageManager?.disconnectMqtt()
+        Log.d(tag, "onDestroy()")
     }
 }
 

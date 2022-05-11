@@ -26,8 +26,9 @@
         <service android:name="org.eclipse.paho.android.service.MqttService" android:enabled="true"/>
 
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:name=".Login"
+            android:exported="true"
+            android:launchMode="singleTask">
 
             <intent-filter>
 
@@ -38,9 +39,13 @@
 
         </activity>
 
-        <activity android:name=".Registration"></activity>
+        <activity
+            android:name=".Registration"
+            android:launchMode="singleTask"></activity>
 
-        <activity android:name=".Content"></activity>
+        <activity
+            android:name=".Content"
+            android:launchMode="singleTask"></activity>
 
     </application>
 

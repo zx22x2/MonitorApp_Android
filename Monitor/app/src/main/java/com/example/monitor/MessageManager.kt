@@ -5,31 +5,24 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.room.Room
-import org.json.JSONException
 import org.json.JSONObject
 
 class MessageManager(applicationContext: Context,
-                     private val activity: AppCompatActivity,
+                     private val content: Content,
                      private val notificationHandler: NotificationHandler,
                      private val username: String) {
 
     private val tag = "MessageManager"
-    private val mqttService = MqttMessageService(applicationContext, this)
-    private val db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "smart_home").build()
-    private val dao = db.getDao()
-    private val dataList = dao.getAll()
-    val mAdapter = MyAdapter(dataList)
+    private val mqttMessageService = MqttMessageService(applicationContext, this)
 
-    private val buttonConfirm: Button = activity.findViewById(R.id.buttonConfirm)
+    private val buttonConfirm: Button = content.findViewById(R.id.buttonConfirm)
     private var isVerifying = false
     private var isVerify = false
     private var isDeviceClose = true
 
 
     init {
-        mqttService.connect()
+        mqttMessageService.connect()
     }
 
     fun add(topic: String, message: String) {
@@ -38,7 +31,7 @@ class MessageManager(applicationContext: Context,
             val jsonObject = JSONObject(message)
             val state = jsonObject.getString("state")
 
-            val deviceStateTextView: TextView = activity.findViewById(R.id.device_state)
+            val deviceStateTextView: TextView = content.findViewById(R.id.device_state)
             deviceStateTextView.text = state
             //進行認領判斷
             if (state == "開") {
@@ -54,8 +47,8 @@ class MessageManager(applicationContext: Context,
                     run {
                         var count = 0.0
                         while (isVerifying && !isVerify && count <= 10 && !isDeviceClose) {
-                            count += 0.1
-                            Thread.sleep(100)
+                            count += 0.01
+                            Thread.sleep(10)
                         }
                         if (isVerify) {
                             val identity = username
@@ -65,7 +58,7 @@ class MessageManager(applicationContext: Context,
                             val topic = "monitor/door/log"
                             val data = "{\"state\": \"$state\", \"time\": \"$time\", \"identity\": \"$identity\"}"
                             val payload = data.toByteArray()
-                            mqttService.mqttClientService!!.publish(mqttService.mqttAndroidClient!!, topic, payload)
+                            mqttMessageService.mqttClientService!!.publish(mqttMessageService.mqttAndroidClient!!, topic, payload)
                         }
                         else if (count > 10 || isDeviceClose) {
                             cancel()
@@ -91,7 +84,7 @@ class MessageManager(applicationContext: Context,
 
     private fun cancel() {
         if (isVerifying) {
-            activity.runOnUiThread {
+            content.runOnUiThread {
                 buttonConfirm.visibility = View.GONE
             }
             isVerifying = false
@@ -104,16 +97,8 @@ class MessageManager(applicationContext: Context,
         val identity = jsonObject.getString("identity")
         val deviceState = DeviceState(0, state, time, identity)
 
-        Thread {
-            run {
-                dao.insert(deviceState)
-            }
-        }.start()
-        dataList.add(deviceState)
-
-        activity.runOnUiThread {
-            mAdapter.notifyItemInserted(dataList.size-1)
-        }
+        Log.d(tag, "call content.record()")
+        content.record(deviceState)
 
         if (identity != "none") {
             notificationHandler.send("於$time 開啟裝置的人是$identity。")
@@ -123,16 +108,7 @@ class MessageManager(applicationContext: Context,
         }
     }
 
-    fun clear() {
-        Thread {
-            run {
-                dao.clear()
-            }
-        }.start()
-        dataList.clear()
-
-        activity.runOnUiThread {
-            mAdapter.notifyDataSetChanged()
-        }
+    fun disconnectMqtt() {
+        mqttMessageService.disconnect()
     }
 }

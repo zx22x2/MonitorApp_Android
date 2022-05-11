@@ -1,7 +1,5 @@
 package com.example.monitor
 
-import android.app.DownloadManager
-import android.content.ContextParams
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -11,7 +9,6 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-import org.json.JSONObject
 
 class Registration : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,7 +17,7 @@ class Registration : AppCompatActivity() {
     }
 
     fun toLogin(view: android.view.View) {
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, Login::class.java)
         startActivity(intent)
         this.finish()
     }
@@ -57,9 +54,7 @@ class Registration : AppCompatActivity() {
             info.visibility = View.VISIBLE
             info.text = "帳號和密碼不可空白"
         }
-
     }
-
 }
 
 

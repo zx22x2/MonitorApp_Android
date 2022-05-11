@@ -3,6 +3,7 @@ package com.example.monitor
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
@@ -11,13 +12,22 @@ import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 
-class MainActivity : AppCompatActivity() {
+class Login : AppCompatActivity() {
+    private val tag = "Activity/Login"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Log.d(tag, "onCreate()")
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d(tag, "onStart()")
 
         val pref = getSharedPreferences("userdata", MODE_PRIVATE)
         val isLogin = pref.getBoolean("isLogin", false)
+        Log.d("isLogin", isLogin.toString())
 
         if (isLogin) {
             toContent()
@@ -27,7 +37,6 @@ class MainActivity : AppCompatActivity() {
     fun toRegistration(view: android.view.View) {
         val intent = Intent(this, Registration::class.java)
         startActivity(intent)
-        this.finish()
     }
 
     fun login(view: android.view.View) {
@@ -81,7 +90,6 @@ class MainActivity : AppCompatActivity() {
     fun toContent() {
         val intent = Intent(this, Content::class.java)
         startActivity(intent)
-        this.finish()
     }
 }
 
