@@ -21,7 +21,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Monitor"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        android:testOnly="false">
         
         <service android:name="org.eclipse.paho.android.service.MqttService" android:enabled="true"/>
 
